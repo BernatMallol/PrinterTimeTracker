@@ -1,0 +1,73 @@
+@startuml
+
+interface Visitable{
+    +accept(Visitor visitor)
+}
+interface Visitor{
+   +print(Task task)
+   +print(TaskManager taskManager)
+   +print(Interval interval)
+}
+
+
+class Tracker{
+String name
+long duration
+getDuration()
+getTracker()
+}
+
+class ClockNotifier {
+    - Clock clockObservable
+    + addObserver()
+    + removeObserver()
+}
+
+class Printer{
+  +print()
+  -printInterval()
+  -printTask()
+  -printTaskManager()
+}
+
+class TaskManager{
+list<Tracker> listTracker
+createTracker()
+}
+
+class Task{
+TaskManager project
+List <Interval> listIntervals
++createInterval()
++endTask()
+}
+
+class Interval extends Observer{
+-Task parentTask
+-LocalDateTime startTime
+-LocalDateTime endTime
++getDuration()
+-calculateDuration()
++getStartTime()
++getEndTime()
+-updateDuration()
++propertyChange(PropertyChangeEvent evt)
++startInterval()
++endInterval()
+}
+
+class Clock{
+getDate()
+setDate()
+date: Date
+timer: Timer
+}
+
+
+Task --|> Visitable
+TaskManager --|> Visitable
+Interval --|> Visitable
+Clock*--ClockNotifier
+Printer --|>Visitor
+
+@enduml
