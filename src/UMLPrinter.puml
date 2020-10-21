@@ -1,73 +1,115 @@
 @startuml
-
-interface Visitable{
-    +accept(Visitor visitor)
-}
-interface Visitor{
-   +print(Task task)
-   +print(TaskManager taskManager)
-   +print(Interval interval)
-}
-
-
-class Tracker{
-String name
-long duration
-getDuration()
-getTracker()
+class Clock{
+-Observable observable
+-Timer clock
+-Clock uniqueInstance
+-Clock()
++getInstance():clock
+-startTick()
+-setTime()
++stopClock()
 }
 
-class ClockNotifier {
-    - Clock clockObservable
-    + addObserver()
-    + removeObserver()
+interface Element{
++print()
 }
 
-class Printer{
-  +print()
-  -printInterval()
-  -printTask()
-  -printTaskManager()
+interface VisitorPrint{
+print(Tracker)
+print(Task)
+print(TaskManager)
+print(Interval)
 }
 
-class TaskManager{
-list<Tracker> listTracker
-createTracker()
-}
-
-class Task{
-TaskManager project
-List <Interval> listIntervals
-+createInterval()
-+endTask()
-}
-
-class Interval extends Observer{
+class Interval{
 -Task parentTask
 -LocalDateTime startTime
 -LocalDateTime endTime
-+getDuration()
--calculateDuration()
-+getStartTime()
-+getEndTime()
--updateDuration()
-+propertyChange(PropertyChangeEvent evt)
-+startInterval()
+-boolean inProgress
++Interval()
++isInProgress():boolean
++getDuration():Duration
++getEndTime():LocalDateTime
++getEndTimeToString():String
++setEndTime()
++getStartTimeToString():String
++getStartTime():LocalDateTime
++update()
++toString():String
++print()
+}
+
+class PrinterVisitor{
++Timer timer
+-TaskManager taskManager
++PrinterVisitor()
++print(Tracker)
++print(TaskManager)
++print(Task)
++print(Interval)
++stopPrinting()
++update()
+}
+
+class Task{
+-TaskManager parentProject
+-List<Interval> listIntervals
+-boolean active
++Task()
++getListIntervals():List<Interval>
++getStartTimeToString():String
++getEndTimeToString():String
++getStartTime():LocalDateTime
++updateParentEndTime()
++getDuration():Duration
 +endInterval()
++createInterval():Interval
++intervalUpdated()
++toString():String
++getEndTime():LocalDateTime
++print()
 }
 
-class Clock{
-getDate()
-setDate()
-date: Date
-timer: Timer
+class TaskManager{
+-TaskManager parentProject
+-List<Tracker> trackers
++TaskManager(String)
++TaskManager(TaskManager,String)
+#updateParentEndTime()
++setStartTime()
++getTrackers():List<Tracker>
++getDuration():Duration
++getStartTime():LocalDateTime
++getStartTimeToString():String
++setEndTime()
++getEndTime():LocalDateTime
++getEndTimeToString():String
++addChild(Tracker)
 }
 
+class Tracker{
+#String name
+#LocalDateTime startTime
+#LocalDateTime endTime
++Tracker()
+#updateParentEndTime()
++getName():String
++getDuration():Duration
++getStartTimeToString():String
++getEndTimeToString():String
++getStartTime():LocalDateTime
++getEndTime():LocalDateTime
+}
 
-Task --|> Visitable
-TaskManager --|> Visitable
-Interval --|> Visitable
-Clock*--ClockNotifier
-Printer --|>Visitor
+interface Observer
+
+class Observable
+
+Interval --|> (Element,Observer)
+(Tracker,TaskManager) --|> Element
+Task --|> Element
+(Task,TaskManager)--|>Tracker
+PrinterVisitor--|>(VisitorPrint,Observer)
+
 
 @enduml
