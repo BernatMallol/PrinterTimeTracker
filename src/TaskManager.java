@@ -1,21 +1,16 @@
-
-
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-enum TrackerType {
-  TASK,
-  PROJECT
-}
-public class TaskManager extends Tracker implements Visitable{
+
+public class TaskManager extends Tracker implements Element{
+
+
   private TaskManager parentProject;
+
   private List<Tracker> trackers;
-
-
-  //TODO LListat de TaskManagers+Tasks
-  //TODO Variable per diferenciar TaskManager de Task
-  //TODO Recuperar la duració TOTAL del conjunt de Tasks+TaskManagers
 
 
   public TaskManager(String name) {
@@ -23,55 +18,80 @@ public class TaskManager extends Tracker implements Visitable{
     trackers = new ArrayList<Tracker>();
   }
 
-  public TaskManager getParentProject() {
-    return parentProject;
+  @Override
+  protected void updateParentEndTime(LocalDateTime endTime) {
+    if (parentProject == null) {
+      this.endTime = endTime;
+    } else {
+      this.endTime = endTime;
+      parentProject.updateParentEndTime(endTime);
+    }
+  }
+
+  public void setStartTime(LocalDateTime startTime) {
+    this.startTime = startTime;
+  }
+
+
+  public List<Tracker> getTrackers() {
+    return trackers;
   }
 
   public TaskManager(TaskManager parentProject, String name) {
     super(name);
     trackers = new ArrayList<Tracker>();
-    this.parentProject =parentProject;
+    this.parentProject = parentProject;
+  }
+
+  public void setTrackers(List<Tracker> trackers) {
+    this.trackers = trackers;
   }
 
   @Override
   public Duration getDuration() {
+    Duration duration = Duration.ZERO;
+    for (Tracker tracker : trackers) {
+      duration = duration.plus(tracker.getDuration());
+    }
     return duration;
   }
 
-  @Override
-  public Tracker getTracker() {
-    return this;
+  public LocalDateTime getStartTime() {
+    return startTime;
   }
 
   @Override
-  protected void updateDuration(Duration durationToAdd) {
-    if (parentProject == null){
-      this.duration = this.duration.plus(durationToAdd);
-    }else {
-      parentProject.updateDuration(duration);
+  public String getStartTimeToString() {
+    if (startTime != null) {
+      return startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
+    return "null";
   }
 
-  public Tracker createTrackers(String name, TrackerType type){
-    switch (type){
-      case TASK:
-        Tracker task = new Task(this, name);
-        trackers.add(task);
-        return task;
-      case PROJECT:
-        Tracker project = new TaskManager(this, name);
-        trackers.add(project);
-        return project;
-      default:
-        break;
+
+  public void setEndTime(LocalDateTime endTime) {
+    if (parentProject != null) {
+      parentProject.setEndTime(endTime);
     }
-    return null;
+    this.endTime = endTime;
   }
 
+  public LocalDateTime getEndTime() {
+    return this.endTime;
+  }
 
   @Override
-  public void accept(Visitor visitor) {
-    visitor.print(this);
+  public String getEndTimeToString() {
+    if (endTime != null) {
+      return endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+    return "null";
   }
+
+  public void addChild(Tracker child) {
+    trackers.add(child);
+  }
+
+
+
 }
-

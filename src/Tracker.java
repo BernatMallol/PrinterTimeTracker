@@ -1,22 +1,27 @@
 import java.time.Duration;
+import java.time.LocalDateTime;
 
-public abstract class Tracker {
+public abstract class Tracker implements Element {
   protected String name;
-  protected Duration duration;
+  protected LocalDateTime startTime;
+  protected LocalDateTime endTime;
 
   public Tracker(String name){
     this.name = name;
-    this.duration = Duration.ZERO;
   }
 
-  public abstract Duration getDuration();
-  public abstract Tracker getTracker();
-  protected abstract void updateDuration(Duration durationToAdd);
-
-
+  protected abstract void updateParentEndTime(LocalDateTime endTime);
   public String getName() {
     return this.name;
   }
+  public abstract Duration getDuration();
+  public abstract String getStartTimeToString();
+  public abstract String getEndTimeToString();
+  public abstract LocalDateTime getStartTime();
+  public abstract LocalDateTime getEndTime();
 
-
+  @Override
+  public void print(VisitorPrint visitorPrint) {
+    visitorPrint.print(this);
+  }
 }

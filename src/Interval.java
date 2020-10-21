@@ -1,41 +1,23 @@
-
-
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Observable;
 import java.util.Observer;
 
-public class Interval implements Observer,Visitable  {
-  private Task parentTask;
+public class Interval implements Observer, Element{
+  private final Task parentTask;
   private LocalDateTime startTime;
   private LocalDateTime endTime;
-  private Duration duration;
   private boolean inProgress;
 
-  public void setDuration(Duration duration) {
-    this.duration = duration;
-  }
-  public void setParentTask(Task parentTask){
-    this.parentTask=parentTask;
-  }
-
-  public Task getParentTask() {
-    return parentTask;
-  }
-
-  public LocalDateTime getStartTime() {
-    return startTime;
-  }
-
-  public void setInProgress(boolean inProgress) {
-    this.inProgress = inProgress;
-  }
-  public Interval() {}
   public Interval(Task task, LocalDateTime startTime){
     this.parentTask=task;
     this.startTime=startTime;
     this.inProgress=true;
-    this.duration = Duration.ZERO;
+  }
+
+  public void setInProgress(boolean inProgress) {
+    this.inProgress = inProgress;
   }
 
   public boolean isInProgress() {
@@ -43,25 +25,39 @@ public class Interval implements Observer,Visitable  {
   }
 
   public Duration getDuration(){
-    return duration;
+    return Duration.between(startTime, endTime);
   }
   public LocalDateTime getEndTime(){
     return endTime;
   }
 
-  private Duration updateDuration() {
-    return Duration.between(startTime, endTime);
+  public String getEndTimeToString(){
+    return endTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
   }
 
   public void setStartTime(LocalDateTime startTime) {
     this.startTime = startTime;
   }
+
   public void setEndTime(LocalDateTime endTime){
     this.endTime=endTime;
   }
 
+  public Task getParentTask() {
+    return parentTask;
+  }
+
+  public String getStartTimeToString() {
+    return startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+  }
+
+  public LocalDateTime getStartTime() {
+    return startTime;
+  }
+
   public void stopInterval(){
     inProgress = false;
+    //parentTask.intervalUpdated(this.endTime);
     parentTask.endInterval(this);
   }
 
@@ -69,7 +65,7 @@ public class Interval implements Observer,Visitable  {
   public void update(Observable observable, Object time) {
     setEndTime((LocalDateTime) time);
     if (inProgress){
-      duration = updateDuration();
+      parentTask.intervalUpdated(this.endTime);
     }
   }
 
@@ -79,15 +75,14 @@ public class Interval implements Observer,Visitable  {
         "parentTask :" + parentTask.getName() +
         ", startTime :" + startTime +
         ", endTime :" + endTime +
-        ", duration :" + duration.getSeconds() +
+        ", duration :" + getDuration() +
         ", inProgress :" + inProgress +
         '}';
   }
 
-
   @Override
-  public void accept(Visitor visitor) {
-    visitor.print(this);
+  public void print(VisitorPrint visitorPrint) {
+    visitorPrint.print(this);
+
   }
 }
-
