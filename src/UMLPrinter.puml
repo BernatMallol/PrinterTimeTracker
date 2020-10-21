@@ -105,11 +105,15 @@ interface Observer
 
 class Observable
 
-Interval --|> (Element,Observer)
-(Tracker,TaskManager) --|> Element
-Task --|> Element
-(Task,TaskManager)--|>Tracker
+TaskManager"0.." -- "1.." Task
+Tracker<|--(TaskManager, Task)
+Task"1"*--"0..*"Interval
+Interval--|>(Element,Observer)
+(Task,TaskManager) o--Tracker
+Observable <|-- Clock
+Clock --* TimerTask
 PrinterVisitor--|>(VisitorPrint,Observer)
-
+(Tracker,TaskManager) --|> Element
+Clock o--Tracker
 
 @enduml
